@@ -21,9 +21,10 @@ class Game(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True
     )
-    number_of_sides = models.PositiveIntegerField(
+    board_side_length = models.PositiveIntegerField(
         blank=False,
-        null=True,
+        null=False,
+        default=3,
         validators=[
             MaxValueValidator(MAX_SIDE_LENGTH),
             MinValueValidator(MIN_SIDE_LENGTH),
@@ -33,33 +34,41 @@ class Game(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
-    def x_moves_played(self):
+    def x_moves_played(self) -> int:
         return Move.objects.filter(game=self, player="X").count()
 
     @property
-    def o_moves_played(self):
+    def o_moves_played(self) -> int:
         return Move.objects.filter(game=self, player="O").count()
 
     @property
-    def winner(self):
-        game_board = [[None] * self.number_of_sides for _ in range(self.number_of_sides)]
+    def winner(self) -> str | None:
+        game_board: list[list[None | str]] = [
+            [None] * self.board_side_length for _ in range(self.board_side_length)
+        ]
         game_moves = Move.objects.filter(game=self).all()
 
         for move in game_moves:
             game_board[move.row - 1][move.column - 1] = move.player
 
         return (
-            check_horizontal_winner(self.number_of_sides, game_board)
-            or check_vertical_winner(self.number_of_sides, game_board)
-            or check_diagonal_winner(self.number_of_sides, game_board)
+            check_horizontal_winner(self.board_side_length, game_board)
+            or check_vertical_winner(self.board_side_length, game_board)
+            or check_diagonal_winner(self.board_side_length, game_board)
         )
+
+    @property
+    def moves(self) -> models.QuerySet:
+        return self.moves
 
 
 class Move(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True
     )
-    game = models.ForeignKey(Game, models.DO_NOTHING, blank=False, null=False)
+    game = models.ForeignKey(
+        Game, models.DO_NOTHING, blank=False, null=False, related_name="moves"
+    )
     player = models.CharField(
         max_length=1, choices=PLAYER_CHOICES, blank=False, null=False
     )

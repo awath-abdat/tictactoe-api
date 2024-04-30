@@ -1,8 +1,9 @@
-from django.urls import path
-from .views import game, play
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path("games/", game),
-    path("games/<uuid:game_id>/", game),
-    path("play/<uuid:game_id>/", play),
-]
+from moves.views import GameViewSet
+
+router = DefaultRouter()
+
+router.register(r"games", GameViewSet, basename="game")
+
+urlpatterns = router.urls
