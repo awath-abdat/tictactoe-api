@@ -1,7 +1,8 @@
 from django.http.response import JsonResponse
 from rest_framework.decorators import action
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.request import Request
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import AllowAny
 from moves.models import Game
 from moves.serializers import (
@@ -12,7 +13,7 @@ from moves.serializers import (
 
 
 # Create your views here.
-class GameViewSet(ModelViewSet):
+class GameViewSet(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMixin):
     queryset = Game.objects.all()
     serializer_class = GameDetailSerializer
     permission_classes = (AllowAny,)
@@ -23,10 +24,7 @@ class GameViewSet(ModelViewSet):
 
         return super().get_serializer_class()
 
-    @action(
-        detail=True,
-        methods=["post"],
-    )
+    @action(detail=True, methods=["post"], serializer_class=NewMoveSerializer)
     def play(self, request: Request, pk=None) -> JsonResponse:
         request.data.update({"game": pk})
         serializer = NewMoveSerializer(data=request.data)
