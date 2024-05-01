@@ -62,12 +62,15 @@ def check_diagonal_winner(
 
         minor_axis_index = number_of_sides - index - 1
         if (
-            minor_axis_index <= len(row)
+            minor_axis_index < len(row)
             and row[minor_axis_index] == minor_axis_start_item
         ):
             minor_axis_start_item_count += 1
 
     if major_axis_start_item_count >= number_of_sides:
         return major_axis_start_item
+
+    if minor_axis_start_item_count >= number_of_sides:
+        return minor_axis_start_item
 
     return None

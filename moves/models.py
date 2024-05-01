@@ -49,7 +49,11 @@ class Game(models.Model):
         game_moves = Move.objects.filter(game=self).all()
 
         for move in game_moves:
-            game_board[move.row - 1][move.column - 1] = move.player
+            if (
+                move.row <= self.board_side_length
+                and move.column <= self.board_side_length
+            ):
+                game_board[move.row - 1][move.column - 1] = move.player
 
         return (
             check_horizontal_winner(self.board_side_length, game_board)
