@@ -28,3 +28,18 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+    - name: Lint with Ruff
+      run: |
+        pip install ruff
+        ruff --output-format=github .
+      continue-on-error: true
+    - name: Lint with mypy
+      run: |
+        pip install mypy
+        mypy .
+      continue-on-error: true
+    - name: Formatting with black
+      run: |
+        pip install black
+        black .
+      continue-on-error: true
